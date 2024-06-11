@@ -1,0 +1,66 @@
+{% extends 'layouts/esignbase.html' %}
+
+{% block title %}ЭЦП сотрудника {{ person.fam }} {{ person.im }} {{ person.ot }}:{% endblock title%}
+
+{% block pageheader %}
+    <h1 class="{% if not g_esigns %} text-danger {% endif %}">
+        ЭЦП сотрудника {{ person.fam }} {{ person.im }} {{ person.ot }} {% if not g_esigns %} (Отстствуют действующие) {% endif %} :
+    </h1>
+{% endblock pageheader %}
+
+{% block endbreadcrumb %}ЭЦП сотрудника{% endblock endbreadcrumb %}
+
+{% block esigncontent %}
+    <div class="card-body">
+        <a href="{% url 'ecp:person_detail' pk=person.pk %}" class="btn bg-gradient-primary" type="button">
+            <i class="icofont icofont-edit"></i>
+            Изменить данные сотрудника
+        </a>
+        {% if not n_esigns %}
+            <a href="{% url 'ecp:esign_new' fk=person.pk %}" class="btn bg-gradient-primary" type="button">
+                <i class="icofont icofont-pen-nib"></i>
+                Оформить новую ЭЦП
+            </a>
+        {% endif %}
+        <p>
+        {% if n_esigns or g_esigns or b_esigns %}
+             {%  if n_esigns %}
+                <br>
+                <h5 class="text-info">ЭЦП в стадии оформления</h5>
+                <ul>
+                    {% for esign in n_esigns %}
+                        <li class="text-warning">
+                            <a href="{% url 'ecp:esign_detail' pk=esign.pk %}">  {{ esign.date_start }} </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            {%  if g_esigns %}
+                <br>
+                <h5 class="text-success">Действующая ЭЦП</h5>
+                <ul>
+                    {% for esign in g_esigns %}
+                        <li class="text-success">
+                            <a href="{% url 'ecp:esign_detail' pk=esign.pk %}"><strong>{{ esign.date_valid }}</strong></a>&nbsp;&nbsp;&nbsp;&nbsp;
+                            {% if esign.cert %}<a href="{% url 'ecp:download' file_type='cert' entity_id=esign.pk %}"><i class="icofont icofont-download-alt"></i></a>&nbsp;&nbsp;&nbsp;&nbsp;{% endif %}
+                            {% if esign.installed %}<i class="icofont icofont-checked"></i>{% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {%  endif %}
+            {% if b_esigns %}
+                <br>
+                <h5 class="text-danger">Просроченные ЭЦП пользователя</h5>
+                <ul>
+                {% for esign in b_esigns %}
+                    <li class='text-danger'>
+                        <a href="{% url 'ecp:esign_detail' pk=esign.pk %}">{{ esign.date_valid }}</a>
+                    </li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        {% else %}
+             <p>Пока что у пользователя нет ЭЦП.</p>
+        {% endif %}
+    </div>
+{% endblock esigncontent %}

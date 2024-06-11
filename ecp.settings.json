@@ -1,0 +1,92 @@
+[
+{
+  "model": "ecp.settings",
+  "pk": 1,
+  "fields": {
+    "setting_name": "OGRN",
+    "setting_value": "1082801000028",
+    "setting_description": "1"
+  }
+},
+{
+  "model": "ecp.settings",
+  "pk": 2,
+  "fields": {
+    "setting_name": "subject_email_cert_10_is_ready",
+    "setting_value": "\"Сертификат\"",
+    "setting_description": "1"
+  }
+},
+{
+  "model": "ecp.settings",
+  "pk": 3,
+  "fields": {
+    "setting_name": "subject_email_cert_09_visit_prompt",
+    "setting_value": "Приглашение на личный визит Получателя сертификата",
+    "setting_description": "Приглашение пользователя на визит"
+  }
+},
+{
+  "model": "ecp.settings",
+  "pk": 4,
+  "fields": {
+    "setting_name": "subject_email_cert_05_reject_operator",
+    "setting_value": "Отклонение запроса на сертификат",
+    "setting_description": "Отклонение запроса без ссылки"
+  }
+},
+{
+  "model": "ecp.settings",
+  "pk": 5,
+  "fields": {
+    "setting_name": "subject_email_cert_03_reject_bot",
+    "setting_value": "Запрос на сертификат № отклонен при автоматической проверке сведений",
+    "setting_description": "Отклонен в ходе автоматической проверки"
+  }
+},
+{
+  "model": "ecp.settings",
+  "pk": 6,
+  "fields": {
+    "setting_name": "subject_email_cert_04_reject_link",
+    "setting_value": "\"Запрос на сертификат отклонен\"",
+    "setting_description": "Отклонен в ходе автоматической проверки"
+  }
+},
+{
+  "model": "ecp.settings",
+  "pk": 7,
+  "fields": {
+    "setting_name": "subject_email_cert_02_reject_operator_ufk",
+    "setting_value": "Запрос на сертификат отклонен оператором Удостоверяющего центра Федерального казначейства",
+    "setting_description": "Отклонение оператором УФК"
+  }
+},
+{
+  "model": "ecp.settings",
+  "pk": 8,
+  "fields": {
+    "setting_name": "ecp_ended_notify_period",
+    "setting_value": "15",
+    "setting_description": "Период для уведомления о просрочке ЭЦП"
+  }
+},
+{
+  "model": "ecp.settings",
+  "pk": 9,
+  "fields": {
+    "setting_name": "request_alive_days",
+    "setting_value": "30",
+    "setting_description": "Срок действия запроса на сертификат"
+  }
+},
+{
+  "model": "ecp.settings",
+  "pk": 10,
+  "fields": {
+    "setting_name": "request_alive_notify",
+    "setting_value": "5",
+    "setting_description": "Предупреждение об окончании действия запроса"
+  }
+}
+]

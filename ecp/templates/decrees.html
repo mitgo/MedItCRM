@@ -1,0 +1,39 @@
+{% extends 'layouts/esignbase.html' %}
+
+{% block title %} Приказы о наделении прав {% endblock title %}
+{% block endbreadcrumb %}Реестр приказов{% endblock endbreadcrumb %}
+{% block pageheader %}
+    <h1>
+        Приказы о наделении сотрудников полномочиями
+        <a class="btn btn-app bg-gradient-info" href="{% url 'ecp:decree_new' %}">
+            <i class="icofont icofont-ui-add"></i>
+            + приказ
+        </a>
+    </h1>
+{% endblock pageheader %}
+
+{% block esigncontent %}
+    <div class="card-body table-responsive p-0">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th class="col-sm-2" scope="col">№ приказа</th>
+                    <th scope="col">Дата</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                {% for decree in decrees %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'ecp:decree_detail' pk=decree.pk %}">{{ decree.number }}</a>
+                        </td>
+                        <td>
+                            <a href="{% url 'ecp:decree_detail' pk=decree.pk %}">{{ decree.d_date }}</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock esigncontent %}

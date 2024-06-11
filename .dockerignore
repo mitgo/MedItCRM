@@ -1,0 +1,14 @@
+db.sqlite3
+uploads/
+.venv
+__pycache__
+.gitignore
+.git
+.env
+.dockerignore
+.idea
+docker
+docker-compose.yml
+Dockerfile
+venv
+token.txt

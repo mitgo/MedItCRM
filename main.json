@@ -1,0 +1,110 @@
+[
+{
+  "model": "main.mainmenu",
+  "pk": 10,
+  "fields": {
+    "title": "ОИиВТ",
+    "app_url": null,
+    "icon": "icofont-architecture-alt",
+    "parent": null,
+    "position": 1,
+    "lft": 1,
+    "rght": 10,
+    "tree_id": 1,
+    "level": 0,
+    "user": [
+      1
+    ],
+    "group": []
+  }
+},
+{
+  "model": "main.mainmenu",
+  "pk": 11,
+  "fields": {
+    "title": "ЭЦП",
+    "app_url": "/ecp/",
+    "icon": "icofont-pen-nib",
+    "parent": 10,
+    "position": 1,
+    "lft": 2,
+    "rght": 5,
+    "tree_id": 1,
+    "level": 1,
+    "user": [],
+    "group": [
+      2,
+      3,
+      4
+    ]
+  }
+},
+{
+  "model": "main.mainmenu",
+  "pk": 12,
+  "fields": {
+    "title": "Картриджи",
+    "app_url": "/cart/",
+    "icon": "icofont-printer",
+    "parent": 10,
+    "position": 2,
+    "lft": 6,
+    "rght": 7,
+    "tree_id": 1,
+    "level": 1,
+    "user": [],
+    "group": []
+  }
+},
+{
+  "model": "main.mainmenu",
+  "pk": 13,
+  "fields": {
+    "title": "Врачи",
+    "app_url": null,
+    "icon": "icofont-doctor-alt",
+    "parent": null,
+    "position": 2,
+    "lft": 1,
+    "rght": 4,
+    "tree_id": 2,
+    "level": 0,
+    "user": [],
+    "group": []
+  }
+},
+{
+  "model": "main.mainmenu",
+  "pk": 14,
+  "fields": {
+    "title": "Железо",
+    "app_url": "/iron/",
+    "icon": "icofont-brand-steam",
+    "parent": 13,
+    "position": null,
+    "lft": 2,
+    "rght": 3,
+    "tree_id": 2,
+    "level": 1,
+    "user": [],
+    "group": []
+  }
+},
+{
+  "model": "main.mainmenu",
+  "pk": 15,
+  "fields": {
+    "title": "ФСС",
+    "app_url": "/fss/",
+    "icon": "icofont-monkey-face",
+    "parent": 10,
+    "position": 2,
+    "lft": 8,
+    "rght": 9,
+    "tree_id": 1,
+    "level": 1,
+    "user": [],
+    "group": []
+  }
+}
+]

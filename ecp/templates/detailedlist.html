@@ -1,0 +1,70 @@
+{% extends 'layouts/esignbase.html' %}
+
+{% block title %}{{ title}}{% endblock title %}
+{% block endbreadcrumb %}Подробности списков{% endblock endbreadcrumb %}
+{% block pageheader %}
+    <h1>
+        {{ title}}
+    </h1>
+{% endblock pageheader %}
+{% load meditcrm %}
+
+{% block esigncontent %}
+    {% if table_of_esigns %}
+        <!-- Default box -->
+        <div class="card-body table-responsive p-0">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        {% for head in table_of_esigns.header.values %}
+                            <th>
+                                {{ head }}
+                            </th>
+                        {% endfor %}
+                        {% if 'max_date' in table_of_esigns.list.0.keys and 'key' not in table_of_esigns.list.0.keys %}
+                            <th>Действие</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for person in table_of_esigns.list %}
+                        <tr>
+                            {% for key in table_of_esigns.header.keys %}
+                                <td>
+                                    {% if key == 'full_name' %}
+                                        {% if 'person__id' in person.keys %}
+                                            <a href="{% url 'ecp:person_esigns' pk=person.person__id %}">
+                                                {{ person|dictitem:key }}
+                                            </a>
+                                        {% else %}
+                                            {{ person|dictitem:key }}
+                                        {% endif %}
+                                    {% else  %}
+                                        {% if key == 'date_start' %}
+                                            <a href="{% url 'ecp:esign_detail' pk=person.pk %}">
+                                                {{ person|dictitem:key }}
+                                            </a>
+                                        {% else %}
+                                            {% if key == 'max_date' %}
+                                                {{ person|dictitem:key|date:"d.m.Y" }}
+                                            {% else %}
+                                                {{ person|dictitem:key }}
+                                            {% endif %}
+                                        {% endif %}
+                                    {% endif %}
+                                </td>
+                            {% endfor %}
+                            {% if 'max_date' in person.keys and 'key' not in person.keys %}
+                                <td>
+                                    <a href="{% url 'ecp:esign_new' fk=person.person__id %}" class="btn bg-gradient-primary" type="button" style="width: 200px;"><i class="icofont-contact-add"></i> Оформить новую</a>
+                                </td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {{ list_of_esigns.0.keys }}
+        </div>
+    {% endif %}
+{% endblock esigncontent%}
+

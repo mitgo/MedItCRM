@@ -1,0 +1,250 @@
+{% extends 'layouts/esignbase.html' %}
+
+{% block title %} Оформление новой ЭЦП {% endblock %}
+{% block endbreadcrumb %}Данные ЭЦП{% endblock endbreadcrumb %}
+{% block pageheader %}
+    <h1>
+        <i class="icofont icofont-pen-nib"></i>
+        {% if not pk %}
+            Создание новой
+        {% else %}
+            Редактирование
+        {% endif %}
+        ЭЦП для <a href="{% url 'ecp:person_esigns' pk=person.pk %}">{{ person.fam }} {{ person.im }} {{ person.ot }}</a>:
+        {% if pk %}
+            <a href="{% url 'ecp:esign_del' pk=pk %}">
+                <i class="icofont-2x icofont-ui-delete"></i>
+            </a>
+        {% endif %}
+    </h1>
+{% endblock pageheader %}
+
+{% block esigncontent %}
+    <div class="card-body">
+        <div class="row">
+            <div class="col-lg-{% if not pk %}6{% else %}12{% endif %}">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="col">
+                            {%  if form.errors %}
+                                <div class="text-danger">
+                                    <strong>Проблемы при сохранении формы!</strong>
+                                </div>
+                                <ul class="text-danger">
+                                    {% for error in form.errors %}
+                                        {% if error != 'cert' %}
+                                            <li> {{ error }} </li>
+                                        {% endif %}
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                            <form method="POST" class="post-form" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <div class = "row">
+                                    <div class="col-sm-12 col-xl-6">
+                                    {% if pk %}
+                                        <br>
+                                        <strong>ОГРН</strong>
+                                        <div>{{ ogrn }}
+                                            <i class="icofont icofont-ui-copy" onclick="copytext(this)"></i>
+                                        </div>
+                                        <br>
+                                    {% endif %}
+                                    {% for field in form.visible_fields %}
+                                        <div class="form-group">
+{#                                          Скрываем отвязываем label от поля, если номер запроса заполнен #}
+{#                                          Так же скрываем поле и лабел для cer если он не заполнен #}
+                                            {% if not field.value or not field.label == 'Номер запроса' %}
+                                                {% if not field.name == 'cer' %}
+                                                    <label for="{{ field.auto_id }}">
+                                                        {{ field.label }}
+                                                    </label>
+                                                {% endif %}
+                                            {% else %}
+                                                {% if field.value and field.name == 'cer' %}
+                                                    <strong>{{ field.label }}</strong>
+                                                {% else %}
+                                                    {% if not field.name == 'cer' %}
+                                                        <strong>{{ field.label }}</strong>
+                                                    {% endif %}
+                                                {% endif %}
+                                            {% endif %}
+{#                                          Добавляем кнопку копирования запроса #}
+                                            {% if field.value and field.label == 'Номер запроса' %}
+                                                <span><span style="display: none;">{{ field.value }}</span><i class="icofont icofont-ui-copy" onclick="copytext(this)"></i></span>
+                                                <span style="display: none;"> {{ field }}</span>
+                                            {% else %}
+                                                {% if field.value and field.label == 'Ссылка на черновик'%}
+                                                        <div class="input-group">
+                                                            {{ field }}
+                                                            <div class="input-group-append">
+                                                                <div class="input-group-text">
+                                                                    <a target="_blank" rel="noopener noreferrer" href="{{ field.value }}">
+                                                                        <i class="icofont icofont-external-link"></i>
+                                                                    </a>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                {% else %}
+                                                    {% if field.field.widget.input_type == 'file' %}
+                                                        {% if field.value and field.name == 'cer' or field.name == 'cert' %}
+                                                            <div class="input-group">
+                                                                <div class="custom-file">
+                                                                    {{ field }}
+                                                                    <label class="custom-file-label" for="{{ field.auto_id }}">{{ field.value }}</label>
+                                                                </div>
+                                                                {% if field.value %}
+                                                                    <div class="input-group-append">
+                                                                        <div class="input-group-text">
+                                                                            <strong>
+                                                                                <a href="{% url 'ecp:download' file_type=field.name entity_id=pk %}">
+                                                                                    <i class="icofont icofont-download"></i>
+                                                                                </a>
+                                                                            </strong>
+                                                                        </div>
+                                                                    </div>
+                                                                {% endif %}
+                                                            </div>
+                                                        {% endif %}
+                                                    {% else %}
+                                                        {{ field }}
+                                                    {% endif %}
+                                                {% endif %}
+                                            {% endif %}
+                                        </div>
+                                    {% endfor %}
+                                    </div>
+                                </div>
+
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                            <button type="submit" class="btn bg-gradient-primary">
+                                <i class="icofont-save"></i>
+                                Сохранить
+                            </button>
+                            </form>
+                    </div>
+                </div>
+            </div>
+            <script>
+            function copytext(el) {
+                let $tmp = $("<textarea>");
+                $("body").append($tmp);
+                $tmp.val($(el.parentNode).text().trim()).select();
+                document.execCommand("copy");
+                $tmp.remove();
+            }
+            </script>
+            {% if not pk %}
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="card-header">
+                                <a target="_blank" class="btn bg-gradient-primary" href="https://fzs.roskazna.ru/public/requests/new">
+                                    <i class="icofont-racings-wheel icofont-2x"></i>
+                                    Поехали!
+                                </a>
+                            </div>
+                            <table class="table">
+                                <tr>
+                                    <td> ОГРН </td>
+                                    <td><div style="display: flex; justify-content: space-between;">{{ ogrn }} <i class="icofont icofont-ui-copy" onclick="copytext(this)"></i></div></td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: center; font-weight: bold;" colspan="2">Паспорт</td>
+                                </tr>
+                                <tr>
+                                    <td> Серия </td>
+                                    <td> <div style="display: flex; justify-content: space-between;">{{ person.pasp_s }} <i class="icofont icofont-ui-copy" onclick="copytext(this)"></i></div> </td>
+                                </tr>
+                                <tr>
+                                    <td> Номер </td>
+                                    <td> <div style="display: flex; justify-content: space-between;">{{ person.pasp_n }} <i class="icofont icofont-ui-copy" onclick="copytext(this)"></i></div> </td>
+                                </tr>
+                                <tr>
+                                    <td> Дата выдачи </td>
+                                    <td> <div style="display: flex; justify-content: space-between;">{{ person.pasp_date|date:'d.m.Y' }} <i class="icofont icofont-ui-copy" onclick="copytext(this)"></i></div> </td>
+                                </tr>
+                                <tr>
+                                    <td> Код подразделения </td>
+                                    <td> <div style="display: flex; justify-content: space-between;">{{ person.pasp_dep|default_if_none:person.pasp_kem }} <i class="icofont icofont-ui-copy" onclick="copytext(this)"></i></div> </td>
+                                </tr>
+                                <tr>
+                                    <td> Дата рождения </td>
+                                    <td> <div style="display: flex; justify-content: space-between;">{{ person.db|date:'d.m.Y' }} <i class="icofont icofont-ui-copy" onclick="copytext(this)"></i></div> </td>
+                                </tr>
+                                <tr>
+                                    <td> Место рождения </td>
+                                    <td> <div style="display: flex; justify-content: space-between;">{{ person.bitrh_place }} <i class="icofont icofont-ui-copy" onclick="copytext(this)"></i></div> </td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: center; font-weight: bold;" colspan="2">ФИО и т.д.</td>
+                                </tr>
+                                <tr>
+                                    <td> Фамилия </td>
+                                <td><div style="display: flex; justify-content: space-between;">{{ person.fam }} <i class="icofont icofont-ui-copy" onclick="copytext(this)"></i></div></td>
+                                </tr>
+                                <tr>
+                                    <td> Имя </td>
+                                    <td><div style="display: flex; justify-content: space-between;">{{ person.im }} <i class="icofont icofont-ui-copy" onclick="copytext(this)"></i></div></td>
+                                </tr>
+                                <tr>
+                                    <td> Отчество </td>
+                                    <td><div style="display: flex; justify-content: space-between;">{{ person.ot }} <i class="icofont icofont-ui-copy" onclick="copytext(this)"></i></div></td>
+                                </tr>
+                                <tr>
+                                    <td> ИНН </td>
+                                    <td><div style="display: flex; justify-content: space-between;">{{ person.inn }} <i class="icofont icofont-ui-copy" onclick="copytext(this)"></i></div></td>
+                                </tr>
+                                <tr>
+                                    <td> СНИЛС </td>
+                                    <td><div style="display: flex; justify-content: space-between;">{{ person.snils }} <i class="icofont icofont-ui-copy" onclick="copytext(this)"></i></div></td>
+                                </tr>
+                                <tr>
+                                    <td> Подразделение </td>
+                                    <td><div style="display: flex; justify-content: space-between;">{{ person.dep__name }} <i class="icofont icofont-ui-copy" onclick="copytext(this)"></i></div></td>
+                                </tr>
+                                <tr>
+                                    <td> Должность </td>
+                                    <td><div style="display: flex; justify-content: space-between;">{{ person.post }} <i class="icofont icofont-ui-copy" onclick="copytext(this)"></i></div></td>
+                                </tr>
+                                <tr>
+                                    <td> e-mail </td>
+                                    <td><div style="display: flex; justify-content: space-between;">cert@bgkb.ru <i class="icofont icofont-ui-copy" onclick="copytext(this)"></i></div></td>
+                                </tr>
+                                <tr>
+                                    <td> Населенный пункт </td>
+                                    <td><div style="display: flex; justify-content: space-between;"> Благовещенск <i class="icofont icofont-ui-copy" onclick="copytext(this)"></i></div></td>
+                                </tr>
+                                <tr>
+                                    <td> Дата приказа </td>
+                                    <td><div style="display: flex; justify-content: space-between;"> {{ person.decrees__d_date|date:'d.m.Y' }} <i class="icofont icofont-ui-copy" onclick="copytext(this)"></i></div></td>
+                                </tr>
+                                <tr>
+                                    <td> Приказ Номер </td>
+                                    <td><div style="display: flex; justify-content: space-between;"> {{ person.decrees__number }} <i class="icofont icofont-ui-copy" onclick="copytext(this)"></i></div></td>
+                                </tr>
+                                <tr>
+                                    <td> Приказ Файл </td>
+                                    <td>
+                                        {% if person.decrees__pk %}
+                                            <a href="{% url 'ecp:download' file_type='decree' entity_id=person.decrees__pk %}">
+                                                <i class="icofont-download-alt"></i>
+                                                Скачать приказ
+                                            </a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td> Телефон </td>
+                                    <td><div style="display: flex; justify-content: space-between;"> {{ person.phone }} <i class="icofont icofont-ui-copy" onclick="copytext(this)"></i></div></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock esigncontent %}

@@ -1,0 +1,41 @@
+{% extends 'layouts/base.html' %}
+
+{% block bodyclass %} hold-transition sidebar-mini {% endblock bodyclass %}
+
+{% block content %}
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            {% block pageheader %}{% endblock pageheader %}
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+                <li class="breadcrumb-item"><a href="/">На главную</a></li>
+            </ol>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+
+    <section class="content">
+      <!-- Default box -->
+      <div class="card card-outline card-primary">
+            {% if messages %}
+                <ul class="error messagelist">
+                    Внимание, ошибки: <br>
+                    {% for message in messages %}
+                        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }} </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            {% block esigncontent %}{% endblock esigncontent %}
+        <!-- /.card-body -->
+      </div>
+      <!-- /.card -->
+    </section>
+    <!-- /.content -->
+</div>
+{% endblock %}

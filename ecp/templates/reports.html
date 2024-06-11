@@ -1,0 +1,48 @@
+{% extends 'layouts/esignbase.html' %}
+
+{% block title %} Отчет по количеству ЭЦП {% endblock title %}
+{% block endbreadcrumb %}Отчет по количеству ЭЦП{% endblock endbreadcrumb %}
+{% block pageheader %}
+    <h1>
+        Отчет по колличеству ЭЦП
+    </h1>
+{% endblock pageheader %}
+
+{% block esigncontent %}
+    <div class="card-body p-0">
+        {% if esigns_report %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col">Тип подразделения</th>
+                            <th scope="col">Количество</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        {% for department in esigns_report %}
+                            <tr>
+                                <td>
+                                    {% if department.person__dep__type_id is not None %}
+                                        <a href="{% url 'ecp:detailed_list_dep' kind='valid_esigns' deptype=department.person__dep__type_id %}">
+                                    {% endif %}
+                                        {{ department.person__dep__type__name }}
+                                    {% if department.person__dep__type_id is not None %}
+                                        </a>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {{ department.cnt }}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+    </div>
+{% endblock esigncontent %}
+
+
+

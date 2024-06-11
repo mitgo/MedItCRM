@@ -1,0 +1,16 @@
+Django==4.2.1
+gunicorn==20.1.0
+django-mptt==0.14.0
+django-js-asset==2.0.0
+sqlparse==0.4.4
+tzdata==2023.3
+asgiref==3.7.1
+split_settings==1.0.0
+psycopg2-binary==2.9.6
+pyodbc==4.0.39
+pytils==0.4.1
+django-cron==0.6.0
+django-auth-ldap==4.6.0
+django-remote-auth-ldap==1.0.0
+rules==3.4
+

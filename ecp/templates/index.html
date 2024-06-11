@@ -1,0 +1,459 @@
+{% extends 'layouts/esignbase.html' %}
+{% load meditcrm %}
+{% block title %}ЭЦП Дашборд{% endblock title %}
+{% block endbreadcrumb %}ЭЦП дашборд{% endblock endbreadcrumb %}
+{% block pageheader %}
+    <h1>
+        ЭЦП дашборд
+    </h1>
+{% endblock pageheader %}
+
+{% block esigncontent %}
+    <div class="card-body">
+        <!-- search -->
+        <div class="card card-primary" id="search_area">
+            <div class="card-header">
+                <h3 class="card-title w-100">
+                    <a class="d-block w-100 {% if not search_str_fio  %}collapsed{% endif %}" data-toggle="collapse" href="#collapseSearch">
+                        <i class="icofont-search-user"></i>
+                        Поиск
+                    </a>
+                </h3>
+            </div>
+            <div id="collapseSearch" class="collapse {% if search_str_fio  %}show{% endif %}" data-parent="#search_area" style>
+                <div class="card-body">
+                    <form class="needs-validation" method="POST" class="form theme-form" action="{% url 'ecp:index' %}">
+                        {% csrf_token %}
+                        <input type="text" name="search_str_fio" value="{{ search_str_fio|default_if_none:"" }}" placeholder="ФИО" class="form-control form-control-sm" style="width: 400px;" maxlength="100" required>
+                        <div class="invalid-feedback">Поле "ФИО" обязательно должно быть заполнено</div>
+                        <button style = "transform: skew(-30deg);" type="submit" class="btn bg-gradient-primary">Искать</button>
+                        {% if search_str_fio  %}
+                            <a href="{% url 'ecp:index' %}" class="btn bg-gradient-primary" type="button">Отмена</a>
+                        {% endif %}
+                    </form>
+                </div>
+        <!-- /.card-body -->
+            </div>
+        </div>
+        <!-- /.search -->
+        <!-- WIDGETS -->
+        <div class="row" style="display: flex; flex-wrap: wrap; justify-content: flex-start; gap: 5px 10px ">
+            {% for widget in widgets %}
+                {% if widget.cnt > 0 %}
+                    <div style="flex-basis: 16.1%;">
+                        <div class="small-box bg-gradient-{{ widget.bg }}">
+                            <div class="inner">
+                                <h3>{{ widget.cnt }}</h3>
+                                <p>{{ widget.header }}</p>
+                            </div>
+                            <div class="icon">
+                                <i class="icofont icofont-{{ widget.icon }}"></i>
+                            </div>
+
+                            {% if widget.footer %}
+                                <div class="small-box-footer">
+                                    <a href="#new_esigns" style="color: blue; font-size: 18px; font-weight: bold;">{{ widget.new }} нов.</a>
+                                    {% if widget.rejected > 0 %}
+                                        <b> + </b><a href="#rejected_persons" style="color: red; font-size: 18px; font-weight: bold;">{{ rejected }} откл.</a>
+                                    {% endif %}
+                                    {% if widget.prompted > 0 %}
+                                        <b> + </b><a href="#prompted_persons" style="color: green; font-size: 18px; font-weight: bold;">{{ prompted }} визит</a>
+                                    {% endif %}
+                                </div>
+                            {% else %}
+                                <a href="{% if widget.kind_href %}{% url 'ecp:detailed_list' kind=widget.kind_href %}{% else %}#new_esigns{% endif %}" class="small-box-footer">
+                                    Подробнее <i class="icofont-arrow-right"></i>
+                                </a>
+                            {% endif %}
+
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+        <!-- /.WIDGETS -->
+        <div class="col-sm-12">
+            <br />
+            <a class="btn btn-app bg-gradient-info" href="{% url 'ecp:person_new' %}">
+                <span class="badge bg-warning">{{ badges.count_persons }}</span>
+                <i class="icofont icofont-businessman"></i>
+                + сотрудник
+            </a>
+            <a class="btn btn-app bg-gradient-info" href="{% url 'ecp:decrees' %}">
+                <span class="badge bg-warning">{{ badges.count_decrees }}</span>
+                <i class="icofont icofont-law-document"></i>
+                Приказы
+            </a>
+            <a class="btn btn-app bg-gradient-info" href="{% url 'ecp:departments' %}">
+                <span class="badge bg-warning">{{ badges.count_departments }}</span>
+                <i class="icofont icofont-building-alt"></i>
+                Отделения
+            </a>
+            <a class="btn btn-app bg-gradient-info" href="{% url 'ecp:reports' %}">
+                <i class="icofont icofont-read-book"></i>
+                Отчет
+            </a>
+            <p>
+        </div>
+
+
+    {% if table_of_rejected_requests.list and not finded_persons.list %}
+            <!-- Default box -->
+            <div id="rejected_persons" class="card card-outline card-red">
+                <div class="card-header border-0">
+                    <h3 class="card-title" style="color: red"><b>Отклоненные запросы ({{ rejected }})</b></h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                            <i class="icofont-collapse"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    {% for head in table_of_rejected_requests.header.values %}
+                                        <th>
+                                            {{ head }}
+                                        </th>
+                                    {% endfor %}
+                                    <th>Действие</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for person in table_of_rejected_requests.list %}
+                                    <tr>
+                                        {% for key in table_of_rejected_requests.header.keys %}
+                                                {% if key == 'full_name' %}
+                                                    <td class="full_name">
+                                                        {% if 'person_id' in person.keys %}
+                                                            <a href="{% url 'ecp:person_esigns' pk=person.person_id %}">
+                                                                {{ person|dictitem:key }}
+                                                            </a>
+                                                        {% else %}
+                                                            {{ person|dictitem:key }}
+                                                        {% endif %}
+                                                    {% else  %}
+                                                    <td>
+                                                    {% if key == 'max_date' %}
+                                                        <a href="{% url 'ecp:esign_detail' pk=person.pk %}">
+                                                            {{ person|dictitem:key }}
+                                                        </a>
+                                                    {% elif key == 'reason' %}
+                                                        {% if person|dictitem:key|length > 0 %}
+                                                            {{ person|dictitem:key }}
+                                                        {% else %}
+                                                            <a href="#no_scroll" onclick="goRejectedLink('{{ person.esign__request_num }}', '{{ person.link }}'); return false">
+                                                                Причина отклонения
+                                                            </a> + <a href="#no_scroll" onclick="copyToClipboard('{{ ogrn }}')">ОГРН</a>
+                                                        {% endif %}
+                                                    {% else  %}
+                                                        {{ person|dictitem:key }}
+                                                    {% endif %}
+                                                {% endif %}
+                                            </td>
+                                        {% endfor %}
+                                            <td>
+                                                <a href="{% url 'ecp:esign_detail' pk=person.pk %}" class="btn bg-gradient-primary" type="button" style="width: 180px;">Редактировать</a>
+                                            </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+        {% endif %}
+
+
+
+
+        {% if table_of_prompted_requests.list and not finded_persons.list %}
+            <!-- Default box -->
+            <div id="prompted_persons" class="card card-outline card-green">
+                <div class="card-header border-0">
+                    <h3 class="card-title" style="color: green"><b>Приглашенные на личный визит ({{ prompted }})</b></h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                            <i class="icofont-collapse"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    {% for head in table_of_prompted_requests.header.values %}
+                                        <th>
+                                            {{ head }}
+                                        </th>
+                                    {% endfor %}
+                                    <th>Действие</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for person in table_of_prompted_requests.list %}
+                                    <tr>
+                                        {% for key in table_of_prompted_requests.header.keys %}
+                                                {% if key == 'full_name' %}
+                                            <td class="full_name">
+                                                    {% if 'person_id' in person.keys %}
+                                                        <a href="{% url 'ecp:person_esigns' pk=person.person_id %}">
+                                                            {{ person|dictitem:key }}
+                                                        </a>
+                                                    {% else %}
+                                                        {{ person|dictitem:key }}
+                                                    {% endif %}
+                                                {% else  %}
+                                            <td>
+                                                    {% if key == 'max_date' %}
+                                                        <a href="{% url 'ecp:esign_detail' pk=person.pk %}">
+                                                            {{ person|dictitem:key }}
+                                                        </a>
+                                                    {% else %}
+                                                        {{ person|dictitem:key }}
+                                                    {% endif %}
+                                                {% endif %}
+                                            </td>
+                                        {% endfor %}
+                                            <td>
+                                                <a href="{% url 'ecp:esign_detail' pk=person.pk %}" class="btn bg-gradient-primary" type="button" style="width: 180px;">Продолжить оформление</a>
+                                            </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+        {% endif %}
+
+
+
+        <!--- New Esigns in process -->
+        {% if table_of_esigns.list and not finded_persons.list %}
+            <!-- Default box -->
+            <div id="new_esigns" class="card card-outline card-primary">
+                <div class="card-header border-0">
+                    <h3 class="card-title" style="color: blue"><b>Сотрудники в стадии оформления ЭЦП</b></h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                            <i class="icofont-collapse"></i>
+                        </button>
+                        <button type="button" class="btn btn-tool" data-target=".full_name">
+                            <i class="icofont-copy"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="copy_table">
+                            <thead>
+                                <tr>
+                                    {% for head in table_of_esigns.header.values %}
+                                        <th>
+                                            {{ head }}
+                                        </th>
+                                    {% endfor %}
+                                    {% if 'date_start' in table_of_esigns.list.0.keys %}
+                                        <th>Действие</th>
+                                    {% endif %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for person in table_of_esigns.list %}
+                                    <tr>
+                                        {% for key in table_of_esigns.header.keys %}
+                                                {% if key == 'full_name' %}
+                                            <td class="full_name">
+                                                    {% if 'person_id' in person.keys %}
+                                                        <a href="{% url 'ecp:person_esigns' pk=person.person_id %}">
+                                                            {{ person|dictitem:key }}
+                                                        </a>
+                                                    {% else %}
+                                                        {{ person|dictitem:key }}
+                                                    {% endif %}
+                                                {% else  %}
+                                            <td>
+                                                    {% if key == 'date_start' %}
+                                                        <a href="{% url 'ecp:esign_detail' pk=person.pk %}">
+                                                            {{ person|dictitem:key }}
+                                                        </a>
+                                                    {% else %}
+                                                        {{ person|dictitem:key }}
+                                                    {% endif %}
+                                                {% endif %}
+                                            </td>
+                                        {% endfor %}
+                                            <td>
+                                                <a href="{% url 'ecp:esign_detail' pk=person.pk %}" class="btn bg-gradient-primary" type="button" style="width: 180px;">Продолжить оформление</a>
+                                            </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+        {% else %}
+            {% if not table_of_esigns.list %}
+                <p class="text-success"><strong>Пока что в базе нет сотрудников с незавершенным процессом оформления ЭЦП.</strong></p>
+            {% endif %}
+        {% endif %}
+
+        {% if finded_persons.list %}
+            <div class="card card-outline card-primary">
+                <div class="card-header border-0">
+                  <h3 class="card-title">По поисковому запросу в базе найдены следующие сотрудники:</h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    {% for head in finded_persons.header.values %}
+                                        <th>
+                                            {{ head }}
+                                        </th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for person in finded_persons.list %}
+                                    <tr>
+                                        {% for key in finded_persons.header.keys %}
+                                            <td>
+                                                {% if key == 'full_name' %}
+                                                    <a href="{% url 'ecp:person_esigns' pk=person.pk %}">
+                                                        {{ person|dictitem:key }}
+                                                    </a>
+                                                {% else  %}
+                                                    {% if key == 'is_active' %}
+                                                        <div class="custom-control custom-checkbox">
+                                                            <input type="checkbox" class="custom-control-input" {% if person|dictitem:key %}checked{% endif %}  id="{{ pk }}" disabled>
+                                                            <label for="{{ pk }}" class="custom-control-label"></label>
+                                                        </div>
+                                                    {% else %}
+                                                        {{ person|dictitem:key }}
+                                                    {% endif %}
+                                                {% endif %}
+                                            </td>
+                                        {% endfor %}
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+
+        {% endif %}
+
+<!--- Finded in 1c -->
+        {% if one_c_pers and not table_of_esigns.list and not finded_persons.list %}
+            <!-- Default box -->
+            <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">По запросу <strong>{{ sfio }}</strong> в 1С найдены следующие сотрудники:</h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <th scope="col">ФИО</th>
+                                <th>Дата увольнения</th>
+                            </thead>
+                            <tbody>
+                                {% for pers in one_c_pers %}
+                                    <tr>
+                                        <td>
+                                            <a href="{% url 'ecp:person_from_1c' sotr_id=pers.id %}">
+                                                {{ pers.Name }}
+                                            </a>
+                                        </td>
+                                        <td>
+                                            {{ pers.Date }}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+        {% endif %}
+
+    </div>
+
+{% endblock esigncontent %}
+
+{% block extra_scripts %}
+    <script>
+        $(document).ready(function() {
+            $(".copy_list").click(function(){
+                var btn = $(this);
+                // Disable the button whilst the clipboard copy is performed
+                btn.prop("disabled", true);
+                var colData = "";
+                // Use a line break to seperate the column data if no separator is specified
+                var colSeparator = "\n";
+                // Loop through all elements with the target class
+                $(btn.data("target")).each(function() {
+                    // Collect the column data and add the separator
+                    colData += $(this).text().trim() + colSeparator;
+                });
+                // Copy the column data to the clipboard
+                copyToClipboard(colData);
+                // Make a copy of the button text
+                var btn_txt = btn.html();
+                // Change the button text to "Copied"
+                btn.html("Скопировано");
+                // Revert the button text after 1.5 seconds
+                setTimeout(function(){
+                    btn.html(btn_txt);
+                    // Enable the button
+                    btn.prop("disabled", false);
+                },1500);
+            });
+        });
+
+        function copyToClipboard(text) {
+            if (window.clipboardData && window.clipboardData.setData) {
+                // IE specific code path to prevent textarea being shown while dialog is visible.
+                return clipboardData.setData("Text", text);
+            } else if (document.queryCommandSupported && document.queryCommandSupported("copy")) {
+                var textarea = document.createElement("textarea");
+                textarea.textContent = text;
+                textarea.style.position = "fixed";  // Prevent scrolling to bottom of page in MS Edge.
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    return document.execCommand("copy");  // Security exception may be thrown by some browsers.
+                } catch (ex) {
+                    console.warn("Copy to clipboard failed.", ex);
+                    return false;
+                } finally {
+                    document.body.removeChild(textarea);
+                }
+            }
+        }
+
+        function goRejectedLink(req_num, link) {
+            copyToClipboard(req_num);
+            window.open(link, '_blank').focus();
+        }
+    </script>
+
+{% endblock extra_scripts %}

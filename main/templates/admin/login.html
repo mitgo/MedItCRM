@@ -1,0 +1,95 @@
+{% extends 'layouts/auth_base.html' %}
+{% load i18n static meditcrm %}
+
+{% block title %} Вход {% endblock title %}
+
+{% block bodyclass %} login-page {% endblock bodyclass %}
+
+{% block content %}
+<div class="login-box">
+  <div class="login-logo">
+    <a href="{% url 'index' %}">Med<b>IT</b>CRM</a>
+  </div>
+  <!-- /.login-logo -->
+  <div class="card">
+    <div class="card-body login-card-body">
+      <p class="login-box-msg">Авторизуйтесь для начала сессии</p>
+
+      <form method="post">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+          {% for error in form.non_field_errors  %}
+            <small class="text-danger mb-3">{{ error }}</small>
+          {% endfor %}
+        {% endif %}
+        <div class="input-group mb-3">
+          <input type="text" class="form-control" id="{{ form.username.id_for_label }}" name="{{ form.username.name }}" placeholder="Username">
+          <div class="input-group-append">
+            <div class="input-group-text">
+              <span class="fas fa-user"></span>
+            </div>
+          </div>
+        </div>
+        <div class="input-group mb-3">
+          <input type="password" class="form-control" name="{{ form.password.name }}" id="{{ form.password.id_for_label }}" placeholder="Пароль">
+          <div class="input-group-append">
+            <div class="input-group-text">
+              <span class="fas fa-lock"></span>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-8">
+            <div class="icheck-primary">
+              <input type="checkbox" id="remember">
+              <label for="remember">
+                Запомнить
+              </label>
+            </div>
+          </div>
+          <!-- /.col -->
+          <div class="col-4">
+            <button type="submit" class="btn btn-primary btn-block">Войти</button>
+          </div>
+          <!-- /.col -->
+        </div>
+      </form>
+    </div>
+    <!-- /.login-card-body -->
+  </div>
+</div>
+
+{% endblock %}
+
+
+{% block javascripts %}
+<script type="application/javascript">
+    {% if form.username.errors %}
+        notification.danger("{{ form.username.errors }}", 'top', 'right');
+    {% endif %}
+    {% if form.password.errors %}
+        notification.danger("{{ form.password.errors }}", 'top', 'right');
+    {% endif %}
+
+    {% if user.is_authenticated %}
+        var msg = "Вы вошли как {{ username }}, но у вас нет доступа к этой " +
+            "странице. Хотите ли Вы войти под другим пользователем ?"
+        notification.warning(msg, 'top', 'right');
+    {% endif %}
+
+    {% if form.errors and not form.non_field_errors %}
+        {% if form.errors.items|length == 1 %}
+            notification.warning("{% trans "Исправьте следующие ошибки." %}", 'top', 'right');
+        {% else %}
+            notification.warning("{% trans "Исправьте следующие ошибки." %}", 'top', 'right');
+        {% endif %}
+    {% endif %}
+
+    {% if form.non_field_errors %}
+        {% for error in form.non_field_errors %}
+            notification.warning("{{ error|checkbox }}", 'top', 'right');
+        {% endfor %}
+    {% endif %}
+</script>
+{% endblock %}

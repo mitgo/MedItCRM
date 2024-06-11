@@ -1,0 +1,45 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: med_it_crm_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+      - /opt/backup/db:/opt/backup
+    env_file:
+      - .env
+  crm:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    image: med_it_crm:latest
+    container_name: med_it_crm
+    command: sh -c "python manage.py collectstatic --noinput && 
+                    python manage.py makemigrations &&
+                    python manage.py migrate && 
+                    gunicorn --reload core.wsgi:application --bind 0.0.0.0:8000"
+    depends_on:
+      - db
+    volumes:
+      - .:/opt/MedItCRM/
+      - uploads_volume:/opt/MedItCRM/uploads
+      - /opt/backup/certs:/opt/backup
+    env_file:
+      - .env
+  nginx:
+    build:
+      dockerfile: ./Dockerfile
+      context: ./docker/
+    container_name: med_it_crm_nginx
+    image: med_it_crm_nginx
+    volumes:
+      - ./static:/opt/MedItCRM/static
+      - uploads_volume:/opt/MedItCRM/uploads
+    depends_on:
+      - crm
+    ports:
+      - "${NGINX_EXTERNAL_PORT}:80"
+volumes:
+  uploads_volume:
+  postgres_data:

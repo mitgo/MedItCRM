@@ -1,0 +1,83 @@
+{% extends 'layouts/esignbase.html' %}
+{% load static meditcrm %}
+{% block select2style %}
+    <link rel="stylesheet" href="{% static 'plugins/select2/css/select2.min.css' %}">
+    <link rel="stylesheet" href="{% static 'plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css' %}">
+{% endblock select2style %}
+
+
+{% block title %} Сотрудник: {{ form.fam.value }} {{ form.im.value }} {{ form.ot.value }}{% endblock %}
+{% block endbreadcrumb %}Данные сотрудника{% endblock endbreadcrumb %}
+{% block pageheader %}
+    <h1>
+        Данные сотрудника:
+        {% if pk %}
+            <a href="{% url 'ecp:person_esigns' pk=pk %}">
+        {% endif %}
+        {{ form.fam.value | default_if_none:'Новый' }} {{ form.im.value | default_if_none:'' }} {{ form.ot.value | default_if_none:'' }}
+        {% if pk %}
+            </a>
+            <a href="{% url 'ecp:person_del' pk=pk %}">
+                <i class="icofont icofont-ui-delete"></i>
+            </a>
+        {% endif %}
+    </h1>
+{% endblock pageheader %}
+
+{% block esigncontent %}
+    <div class="card-body">
+        <div class="row">
+            <div class="col">
+                {%  if form.errors %}
+                    <ul class="text-danger">
+                        {% for error in form.errors %}
+                            {% if error == 'pasp_dep' %}
+                                Код подразделения не указан, но можно поискать <a target="_blank" rel="noopener noreferrer" href = "https://domosite.ru/ufms/amur">здесь</a>
+                            {% else %}
+                                <li> {{ error }} </li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                <form method="POST" class="form theme-form">
+                    {% csrf_token %}
+                        <div class = "row">
+                            {% widthratio form.visible_fields|length 2 1 as fields_center %}
+                            {% with form.visible_fields|chunk_list:fields_center as chunks %}
+                                {% for chunk in chunks %}
+                                    <div class="col-sm-12 col-xl-6">
+                                    {% for field in chunk %}
+                                        {%  if field.field.widget.input_type == 'checkbox' %}
+                                            <div class = "custom-control custom-checkbox">
+                                                {{ field }}
+                                                <label for="{{ field.id_for_label }}" class="custom-control-label">{{ field.label }}</label>
+                                        {% else %}
+                                            <div class="mb-3">
+                                                <label class="form-label">{{ field.label }}</label>
+                                                {{ field }}
+                                        {% endif %}
+                                            </div>
+                                    {% endfor %}
+                                    </div>
+                                {% endfor %}
+                            {% endwith %}
+                        </div>
+                    <button type="submit" class="btn btn-primary"><i class="icofont-save"></i> Сохранить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock esigncontent %}
+{% block extra_scripts %}
+    <script src="{% static 'plugins/select2/js/select2.full.min.js' %}"></script>
+    <script>
+        $(document).ready(
+            function() {
+                $('.select2').select2();
+                $('.select2bs4').select2({
+                    theme: 'bootstrap4'
+                })
+            }
+        );
+    </script>
+{% endblock extra_scripts %}

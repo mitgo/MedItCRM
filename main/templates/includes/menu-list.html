@@ -1,0 +1,80 @@
+{% load static meditcrm %}
+
+<ul class="nav sidebar-menu nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+    <!-- Add icons to the links using the .nav-icon class
+           with font-awesome or any other icon font library -->
+
+    {% admin_get_menu as app_list %}
+    {% if app_list %}
+        {% for app in app_list %}
+            {% if app.has_perms and not app.pinned %}
+                <li class="nav-item {% if app.url in request.path|urlencode %}menu-open{% endif %}
+                            {% if app.items %}{% for item in app.items %}{% if item.url in request.path %}menu-open{% endif %}{% endfor %}{% endif %}">
+                    <a class="nav-link {% if app_label != app.label and app.url not in request.path|urlencode  %}collapsed{% endif %}"
+                     href="{{ app.url|default_if_none:"#" }}">
+                    <i class="nav-icon {{ app.icon|default_if_none:"spinner-alt-4" }}"></i>
+                    <p>
+                      {{ app.label|slice:10 }}{% if app.label|length > 10 %}..{% endif %}
+                      <i class="right icofont icofont-circled-left"></i>
+                    </p>
+                  </a>
+
+                  {% if app.items %}
+                  <ul class="nav nav-treeview">
+                    {% for model in app.items %}
+                        <li class="nav-item">
+                            <a class="nav-link {% if model.url in request.path|urlencode %}active{% endif %}"
+                                href="{{ model.url|default_if_none:'#' }}">
+                                <i class="nav-icon {{ model.icon|default_if_none:'icofont-check-circled' }}" style="margin-left: 25px;"></i>
+                                <p>{{ model.label }}</p>
+                            </a>
+                        </li>
+                    {% endfor %}
+                  </ul>
+                  {% endif %}
+                </li>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+
+    {% if request.user.is_superuser %}
+
+    {% endif %}
+
+
+    {% if not request.user.is_superuser %}
+
+    {% endif %}
+
+    {% if request.user.is_authenticated and not request.user.is_superuser %}
+
+    {% endif %}
+
+
+
+    {% if request.user.is_authenticated %}
+    <li class="nav-item">
+      <a href="{% url 'logout' %}" class="nav-link">
+        <i class="icofont-sign-out nav-icon"></i>
+        <p>Выход</p>
+      </a>
+    </li>
+    {% else %}
+    <li class="nav-item">
+      <a href="{% url 'login' %}" class="nav-link">
+        <i class="icofont-sign-in nav-icon"></i>
+        <p>Вход</p>
+      </a>
+    </li>
+{#    <li class="nav-item">#}
+{#      <a href="{% url 'register' %}" class="nav-link">#}
+{#        <i class="fa fa-user-plus nav-icon"></i>#}
+{#        <p>Регистрация</p>#}
+{#      </a>#}
+{#    </li>        #}
+    {% endif %} 
+
+
+
+  </ul>

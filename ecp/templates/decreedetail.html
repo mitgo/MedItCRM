@@ -1,0 +1,124 @@
+{% extends 'layouts/esignbase.html' %}
+
+{% block title %} Редактирование приказа {% endblock title %}
+{% block endbreadcrumb %}Данные приказа{% endblock endbreadcrumb %}
+{% block pageheader %}
+    <h1>
+        {% if form.number.value %}
+            Приказ № {{ form.number.value }} от {{ form.d_date.value }}
+        {% else %}
+            Новый приказ
+        {% endif %}
+    </h1>
+{% endblock pageheader %}
+
+{% block esigncontent %}
+    <div class="card-body">
+        <div class="row">
+            <div class="col">
+                {%  if form.errors %}
+                    <ul class="text-danger">
+                        {% for error in form.errors %}
+                            <li> {{ error }} </li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                <form method="POST" class="post-form" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class = "row">
+                        <div class="col-sm-12 col-xl-6">
+                        {% for field in form.visible_fields %}
+                            <div class="mb-3">
+                                <label class="form-label">{{ field.label }}</label>
+                                {% if field.field.widget.input_type == 'file' %}
+                                    <div class="input-group">
+                                        <div class="custom-file">
+                                            {{ field }}
+                                            <label class="custom-file-label" for="{{ field.auto_id }}">{{ field.value }}</label>
+                                        </div>
+                                        {% if field.value %}
+                                            <div class="input-group-append">
+                                                <div class="input-group-text">
+                                                    <strong>
+                                                        <a href="{% url 'ecp:download' file_type='decree' entity_id=pk %}">
+                                                            <i class="icofont icofont-download"></i>
+                                                        </a>
+                                                    </strong>
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                {% else %}
+                                    {{ field }}
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                        </div>
+                    </div>
+                    <button type="submit" class="btn bg-gradient-primary"><i class="icofont-save"></i> Сохранить</button>
+                </form>
+                <p></p>
+                <hr>
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="card" id="persons_in_decree">
+                            <div class="card-header">
+                                <h5 class="card-title w-100">
+                                    <a class="d-block w-100 collapsed" data-toggle="collapse" aria-expanded="false" href="#collapse_persons_in_decree">
+                                        <i class="icofont icofont-users"></i>
+                                        Список сотрудников в приказе:
+                                    </a>
+                                </h5>
+                            </div>
+                            <div id="collapse_persons_in_decree" class="card-body collapse" data-parent="#persons_in_decree">
+                                <div class="row">
+                                    <ul>
+                                        {% if persons %}
+                                            {% for person in persons %}
+                                                <li>
+                                                    {{ person.fam }} {{ person.im }} {{ person.ot }}
+                                                </li>
+                                            {% endfor %}
+                                        {% endif %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% if pk %}
+                        <div class="col-lg-6">
+                            <div class="card" id="add_persons_to_decree">
+                                <div class="card-header">
+                                    <h5 class="card-title w-100">
+                                        <a class="d-block w-100 collapsed" data-toggle="collapse" aria-expanded="false" href="#collapse_add_persons_to_decree">
+                                            <i class="icofont icofont-users-social"></i>
+                                            Загрузить список сотрудников
+                                        </a>
+                                    </h5>
+                                </div>
+                                <div id="collapse_add_persons_to_decree" class="card-body collapse {% if err_pers %} show {% endif %}" data-bs-parent="#add_persons_to_decree" style="">
+                                    <form method="POST" class="post-form" action="{% url "ecp:decree_upload_persons" pk=pk %}" enctype ="multipart/form-data">
+                                        {% csrf_token %}
+                                        <div class="input-group">
+                                            <div class="custom-file">
+                                                <input class="form-control" type="file" required name="persons" id="csv_file">
+                                                <label class="custom-file-label" for="csv_file">Выберите CSV файл</label>
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="btn bg-gradient-primary"><i class="icofont-send-mail"></i> Отправить</button>
+                                    </form>
+                                    {% if err_pers %}
+                                        <h5 class="text-danger">Следующие сотрудники из списка не найдены в базе:</h5>
+                                        {% for pers in err_pers %}
+                                            <li class="text-danger">{{ pers }}</li>
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock esigncontent %}
